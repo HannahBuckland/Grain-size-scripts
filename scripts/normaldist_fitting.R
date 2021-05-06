@@ -12,7 +12,7 @@
 
 # The first and final row must contain 0 % in the 'perc' column (expand range of bins if necessary)
 # The data should be ordered low to high in mm
-# The perc (percentage) column must sum to 100%
+# The perc (percentage) column must sum to 100% and be rounded to 2 decimal places
 # Example input files are found in the examples folder
 
 
