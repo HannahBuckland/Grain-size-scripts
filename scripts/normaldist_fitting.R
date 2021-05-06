@@ -14,7 +14,7 @@
 # The data should be ordered low to high in mm
 # The perc (percentage) column must sum to 100% and be rounded to 2 decimal places
 # Example input files are found in the examples folder
-
+# YOu might need to install the following libraries if you don't already have them in your R environment
 
 library(fitdistrplus)
 library(mixR)
@@ -29,6 +29,8 @@ library(patchwork)
 GSDfile <- "examples/basic_fullphi.txt" # path to grain size distribution file (see format guidelines above)
 GSDname <- "Basic_example" # name for script to name outputs
 bimodal <- "FALSE" # TRUE or FALSE
+
+# Execute whole script to save outputs
 
 # Shouldn't need to change below this line (but feel free to personalise if you would like)
 ######################################################
