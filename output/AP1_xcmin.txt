@@ -1,3 +1,0 @@
-"Method of Moments (phi)"	"Folk and Ward (phi)"	"Inman (phi)"	"Normal Fit (phi)"
-"Mean"	5.112	5.114	5.111	5.112
-"SD"	1.256	1.251	1.234	1.264

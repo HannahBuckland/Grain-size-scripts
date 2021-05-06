@@ -5,15 +5,15 @@
 
 # Input data must be in tab separated text file with three columns with following headers:
 
-#    | mm        | phi       | PDF      |
+#    | mm        | phi       | perc      |
 #    | 0.00024   | 12        | 0        |
 #    | ...       | ...       | ...      |
 #    | 32         | -5       | 0        |
 
-# The first and final row must contain no wt% in the PDF column (expand range of bins if necessary)
+# The first and final row must contain 0 % in the 'perc' column (expand range of bins if necessary)
 # The data should be ordered low to high in mm
-# The PDF column must sum to 100%
-# An example input file is found in the examples folder
+# The perc (percentage) column must sum to 100%
+# Example input files are found in the examples folder
 
 
 library(fitdistrplus)
@@ -26,8 +26,8 @@ library(patchwork)
 ##############################################
 # USER INPUTS
 
-GSDfile <- "examples/AP1_xjet_xcminhalfphi.txt" # path to grain size distribution file (see format guidelines above)
-GSDname <- "AP1_xcmin" # name for script to name outputs
+GSDfile <- "examples/basic_fullphi.txt" # path to grain size distribution file (see format guidelines above)
+GSDname <- "Basic_example" # name for script to name outputs
 bimodal <- "FALSE" # TRUE or FALSE
 
 # Shouldn't need to change below this line (but feel free to personalise if you would like)
@@ -39,7 +39,7 @@ SIMDATAFUN <- function(GSDfile) {
   # Read in and manipulate data
   
   gsd <- read.table(GSDfile, sep="", header = TRUE)
-  gsd$freq <- gsd$PDF*1000
+  gsd$freq <- round(gsd$perc*100,0)
   
   phi_bins <- gsd$phi
   phi_bins <- append(phi_bins, values = tail(phi_bins,1)-(phi_bins[1]-phi_bins[2]), after = length(phi_bins))
@@ -53,13 +53,13 @@ SIMDATAFUN <- function(GSDfile) {
   
   gsd$midmm <- 2^-gsd$midphi
   
-  # Manipulate data into artificial distribution in phi scale using wt% PDF
-  # Simulates ~100000 grain size measurements that produce histogram that matches measured PDF
+  # Manipulate data into artificial distribution on phi scale using measured percentage in each size fraction
+  # Simulates ~10000 grain size measurements that produce histogram that matches measured distribution
   # The frequency in each bin is a factor of the the wt or vol% in each bin 
   # The range of simulated values is uniformly distributed between the max and min of each grain size bin
   output <- list()
   for (i in 1:length(gsd$phi)) {
-    output[[i]] <- runif((as.numeric(gsd$freq[i])), min=phi_bins[i + 1], max=phi_bins[i])
+    output[[i]] <- runif(gsd$freq[i], min=phi_bins[i + 1], max=phi_bins[i])
   }
   
   fout <- list(gsd=gsd,phi_bins = phi_bins, mm_bins = mm_bins, output=output)
@@ -70,7 +70,6 @@ SIMDATAFUN <- function(GSDfile) {
 simulate <- SIMDATAFUN(GSDfile) # applying function to GSD file
 
 simdata <- unlist(simulate$output) # getting into long format
-simdatared <- sample(simdata,size = 10000,replace=FALSE) # reducing sample size for 'mixfit' functionality
 
 phi_bins <- simulate$phi_bins # add to environment
 
@@ -90,13 +89,13 @@ NORMFITFUN <- function(gsd){
   
   # Calculate Method of Moments mean and standard deviation
   
-  log_mean <- sum(gsd$PDF*gsd$midphi)/100
-  log_sd <- sqrt(sum(gsd$PDF*(gsd$midphi-log_mean)^2)/100)
+  log_mean <- sum(gsd$perc*gsd$midphi)/100
+  log_sd <- sqrt(sum(gsd$perc*(gsd$midphi-log_mean)^2)/100)
   
   # Graphical Folk and Ward method using linear interpolation of cumulative plot
   
   gsd <- gsd[order(gsd$phi),]
-  gsd$cum <- cumsum(gsd$PDF)
+  gsd$cum <- cumsum(gsd$perc)
   gsd <- gsd[order(-gsd$phi),]
   
   phi5 <- approx(x=gsd$cum, y=gsd$phi, xout=5, method = "linear", ties = mean)
@@ -186,13 +185,15 @@ NORMFITFUN <- function(gsd){
   fit_labels <- c("Folk and Ward","Inman","fitdist","Method of Moments")
   fit_colours <- c("#264653","#2a9d8f","#e9c46a","#e63946")
   
+  phi_bin_fact <- 100*(phi_bins[1]-phi_bins[2])
+  
   nfitplt <-
     ggplot(data = simdf) +
     geom_histogram(aes(x=size, y =..density..,fill = "Simulated Data"), breaks = phi_bins, colour = "grey50") +
     geom_line(data = gsd,
-              aes(x=midphi, y = PDF/50)) +
+              aes(x=midphi, y = perc/phi_bin_fact)) +
     geom_point(data = gsd,
-               aes(x=midphi, y = PDF/50), colour = "grey30") +
+               aes(x=midphi, y = perc/phi_bin_fact), colour = "grey30") +
     geom_line(data = normal_pivot,
               aes(x=x,y=value,colour=name)) +
     geom_vline(data = mean_pivot,
@@ -201,7 +202,7 @@ NORMFITFUN <- function(gsd){
     scale_colour_manual(values = fit_colours,
                         labels = fit_labels) +
     ylab("Density") +
-    scale_y_continuous(sec.axis = sec_axis(trans = ~.*50,
+    scale_y_continuous(sec.axis = sec_axis(trans = ~.*phi_bin_fact,
                                            name = "Measured (%)")) +
     scale_x_reverse(breaks = phi_plotting$breaks, 
                     labels = phi_plotting$breaks,
@@ -224,7 +225,7 @@ NORMFITFUN <- function(gsd){
   # Setup dataframe of parameters to print
   
   params <- as.data.frame(cbind(logM,FW,IN,nfit_param))
-  colnames(params) <- c("Method of Moments (phi)", "Folk and Ward (phi)","Inman (phi)","Normal Fit (phi)")
+  colnames(params) <- c("Method of Moments (phi)", "Folk and Ward (phi)","Inman (phi)","fitdist (phi)")
   rownames(params) <- c("Mean","SD")
   
   params <- round(params,3)
@@ -242,7 +243,7 @@ if (bimodal == TRUE) {
   
   BINORMFITFUN <- function(simdatared) {
     
-    mixmdl <- mixfit(simdatared, ncomp = 2, family = "norm")
+    mixmdl <- mixfit(simdata, ncomp = 2, family = "norm")
     
     nfit1 <- mixmdl$pi[1]*dnorm(x,mixmdl$mu[1],mixmdl$sd[1])
     nfit2 <- mixmdl$pi[2]*dnorm(x,mixmdl$mu[2],mixmdl$sd[2])
@@ -251,20 +252,22 @@ if (bimodal == TRUE) {
     bimodal_fit <- data.frame(x=x,nfit1=nfit1,nfit2=nfit2,nsumfit=nsumfit)
     bimodal_pivot <- pivot_longer(bimodal_fit,cols =c(nfit1,nfit2,nsumfit))
     
+    phi_bin_fact <- 100*(phi_bins[1]-phi_bins[2])
+    
     bimodalfitplt <-
       ggplot(data = simdf) +
       geom_histogram(aes(x=size, y =..density..,fill = "Simulated Data"), breaks = phi_bins, colour = "grey50") +
       geom_line(data = gsd,
-                aes(x=midphi, y = PDF/50)) +
+                aes(x=midphi, y = perc/phi_bin_fact)) +
       geom_point(data = gsd,
-                 aes(x=midphi, y = PDF/50), colour = "grey30") +
+                 aes(x=midphi, y = perc/phi_bin_fact), colour = "grey30") +
       geom_line(data = bimodal_pivot,
                 aes(x=x,y=value,colour=name, size = name)) +
       scale_fill_manual(values = "grey80") +
       scale_colour_manual(values = c("darkcyan","coral","grey10")) +
       scale_size_manual(values = c(1,1,2)) + 
       ylab("Density") +
-      scale_y_continuous(sec.axis = sec_axis(trans = ~.*50,
+      scale_y_continuous(sec.axis = sec_axis(trans = ~.*phi_bin_fact,
                                              name = "Measured (%)")) +
       scale_x_reverse(breaks = phi_plotting$breaks, 
                       labels = phi_plotting$breaks,
@@ -289,7 +292,7 @@ if (bimodal == TRUE) {
     fit2param <- c(mixmdl$pi[2],mixmdl$mu[2],mixmdl$sd[2])
     
     bimod <- data.frame(cbind(fit1param,fit2param))
-    colnames(bimod) <- c("nfit1","nfit2")
+    colnames(bimod) <- c("nfit1 (phi)","nfit2 (phi)")
     rownames(bimod) <- c("Prop", "Mean","SD")
     
     bimod[1:2] <- round(bimod[1:2], 3)

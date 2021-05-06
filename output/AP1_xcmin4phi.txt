@@ -1,0 +1,3 @@
+"Method of Moments (phi)"	"Folk and Ward (phi)"	"Inman (phi)"	"fitdist (phi)"
+"Mean"	4.753	4.736	4.722	4.752
+"SD"	1.258	1.267	1.265	1.261
