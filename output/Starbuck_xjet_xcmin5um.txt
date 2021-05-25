@@ -1,0 +1,12 @@
+"Log-normal" "Weibull" "lnfit1" "lnfit2" "weibfit1" "weibfit2"
+"Uni_mu'_or_shape" -3.666 1.033 NA NA NA NA
+"Uni_sigma'_or_scaale" 1.121 0.044 NA NA NA NA
+"Uni_median (mm)" 0.026 0.031 NA NA NA NA
+"Uni_mean (mm)" 0.048 0.043 NA NA NA NA
+"Uni_mode (mm)" 0.007 0.002 NA NA NA NA
+"Bimod_Prop" NA NA 0.757 0.243 0.633 0.367
+"Bimod_mu'_or_shape" NA NA -4.103 -2.308 1.611 3.129
+"Bimod_sigma'_or_scale" NA NA 0.928 0.215 0.018 0.101
+"Bimod_median (mm)" NA NA 0.017 0.099 0.015 0.09
+"Bimod_mean (mm)" NA NA 0.025 0.102 0.016 0.09
+"Bimod_mode (mm)" NA NA 0.007 0.095 0.01 0.089

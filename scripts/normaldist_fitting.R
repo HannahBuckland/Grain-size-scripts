@@ -26,9 +26,9 @@ library(patchwork)
 ##############################################
 # USER INPUTS
 
-GSDfile <- "examples/basic_fullphi.txt" # path to grain size distribution file (see format guidelines above)
-GSDname <- "Basic_example" # name for script to name outputs
-bimodal <- "FALSE" # TRUE or FALSE
+GSDfile <- "examples/mazama_bimodal.txt" # path to grain size distribution file (see format guidelines above)
+GSDname <- "Mazama_bimodal" # name for script to name outputs
+bimodal <- "TRUE" # TRUE or FALSE
 
 # Execute whole script to save outputs
 
@@ -287,8 +287,6 @@ if (bimodal == TRUE) {
             panel.border = element_rect(colour = "black"),
             plot.margin = margin(0.5,0.5,0.5,0.5, "cm"),
             plot.title = element_text(margin = margin(0,0,0.5,0,"cm")))
-    
-    nmixcheck <- auc(x,nsumfit)
     
     fit1param <- c(mixmdl$pi[1],mixmdl$mu[1],mixmdl$sd[1])
     fit2param <- c(mixmdl$pi[2],mixmdl$mu[2],mixmdl$sd[2])
