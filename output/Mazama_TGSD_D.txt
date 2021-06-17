@@ -1,0 +1,6 @@
+"Method of Moments (phi)"	"Folk and Ward (phi)"	"Inman (phi)"	"fitdist (phi)"	"nfit1 (phi)"	"nfit2 (phi)"
+"UniMean"	4.348	4.304	4.141	4.353	NA	NA
+"UniSd"	1.935	1.991	2.105	1.956	NA	NA
+"Prop"	NA	NA	NA	NA	0.274	0.726
+"BimodMean"	NA	NA	NA	NA	1.873	5.291
+"BimodSd"	NA	NA	NA	NA	0.884	1.331
