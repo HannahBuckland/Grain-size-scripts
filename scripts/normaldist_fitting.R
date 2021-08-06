@@ -26,9 +26,9 @@ library(patchwork)
 ##############################################
 # USER INPUTS
 
-GSDfile <- "examples/Mazama_TGSD_E.txt" # path to grain size distribution file (see format guidelines above)
-GSDname <- "Mazama_TGSD_E" # name for script to name outputs
-bimodal <- "FALSE" # TRUE or FALSE
+GSDfile <- "examples/Mazama_TGSD_Coarse.txt" # path to grain size distribution file (see format guidelines above)
+GSDname <- "Mazama_TGSD_Coarse" # name for script to name outputs
+bimodal <- "TRUE" # TRUE or FALSE
 
 # Execute whole script to save outputs
 
